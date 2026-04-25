@@ -1,0 +1,10 @@
+{
+  "remove first goods":{
+      "goods_name":"Sauce Labs Backpack",
+      "count": "2"
+  },
+  "remove second goods":{
+      "goods_name":"Sauce Labs Bike Light",
+      "count": "1"
+  }
+}

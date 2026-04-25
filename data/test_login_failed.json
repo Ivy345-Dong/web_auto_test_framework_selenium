@@ -1,0 +1,22 @@
+{
+  "input wrong username":{
+      "username":"standard_user22",
+      "password": "secret_sauce",
+      "keywords": "Epic sadface: Username and password do not match any user in this service"
+  },
+  "input wrong password":{
+      "username":"standard_user",
+      "password": "secret_sauce22",
+      "keywords": "Epic sadface: Username and password do not match any user in this service"
+  },
+  "input empty password":{
+      "username":"standard_user",
+      "password": "",
+      "keywords": "Epic sadface: Password is required"
+  },
+  "input empty username":{
+      "username":"",
+      "password": "secret_sauce",
+      "keywords": "Epic sadface: Username is required"
+  }
+}

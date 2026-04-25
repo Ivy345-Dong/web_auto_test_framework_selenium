@@ -1,0 +1,7 @@
+{
+  "test login success":{
+      "username":"standard_user",
+      "password": "secret_sauce",
+      "keywords": "Add to cart"
+  }
+}
