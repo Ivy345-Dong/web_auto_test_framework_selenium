@@ -1,3 +1,0 @@
-INFO     test_framework:conftest.py:55 prepare to test: test_login_success[standard_user-secret_sauce-Add to cart]
-WARNING  selenium.webdriver.common.selenium_manager:selenium_manager.py:163 Exception managing chrome: error decoding response body
-INFO     test_framework:conftest.py:62 clean test: test_login_success[standard_user-secret_sauce-Add to cart]

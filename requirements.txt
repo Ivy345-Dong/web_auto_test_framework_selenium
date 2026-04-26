@@ -1,5 +1,6 @@
 selenium==4.43.0
 pytest==9.0.2
 allure-pytest
+pytest-xdist==3.8.0
 pyyaml
 webdriver-manager

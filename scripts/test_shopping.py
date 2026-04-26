@@ -1,4 +1,3 @@
-#定义测试购物袋类
 import pytest
 
 from page.cart_page import CartProxy
@@ -10,39 +9,42 @@ from utility.driver_factory import DriverFactory
 from utility.com import is_element_present
 
 
+@pytest.mark.usefixtures("driver_class")
 class TestShopping:
-    def setup_class(self):
-        self.driver = DriverFactory.get_web_driver()
-        self.home_proxy = HomeProxy()
-        self.login_proxy = LoginProxy()
-        self.cart_proxy = CartProxy()
-        self.swag_labs_proxy = SwagLabsProxy()
+
+    @classmethod
+    def setup_class(cls):
+        """Initialize page objects before all tests"""
+        cls.driver = DriverFactory.get_web_driver()
+        cls.home_proxy = HomeProxy()
+        cls.login_proxy = LoginProxy()
+        cls.cart_proxy = CartProxy()
+        cls.swag_labs_proxy = SwagLabsProxy()
+
+    # Step 1: Login
+    def test_login(self):
+        """Test login to the application"""
         self.login_proxy.login("standard_user", "secret_sauce")
 
-    def teardown_class(self):
-        self.swag_labs_proxy.logout()
-        DriverFactory.quit_web_driver()
-
-
-    #test add a goods to cart
-    @pytest.mark.run(order=3)
-    @pytest.mark.parametrize("goods_name, count",get_json_data(r"D:\my_files\projects\saucedemo\data\test_add_to_cart.json"))
+    # Step 2: Test add goods to cart
+    @pytest.mark.parametrize("goods_name, count",
+                             get_json_data(r"D:\my_files\projects\saucedemo\data\test_add_to_cart.json"))
     def test_add_goods_to_cart(self, goods_name, count):
-        # add a goods to cart, this method will return the number showed in cart badge
+        """Test adding goods to cart - runs after login"""
         number = self.home_proxy.add_goods_to_cart_and_check_number(goods_name)
-        # assert the actual count equals expect count
         assert number == count
 
-    #test remove from cart
-    @pytest.mark.run(order=4)
-    @pytest.mark.parametrize("goods_name, count",get_json_data(r"D:\my_files\projects\saucedemo\data\test_remove_from_cart.json"))
-    def test_remove_goods_from_cart(self,goods_name, count):
+    # Step 3: Test remove goods from cart
+    @pytest.mark.parametrize("goods_name, count",
+                             get_json_data(r"D:\my_files\projects\saucedemo\data\test_remove_from_cart.json"))
+    def test_remove_goods_from_cart(self, goods_name, count):
+        """Test removing goods from cart - runs after add test"""
         self.home_proxy.home_handle.click_cart_icon()
         self.cart_proxy.remove_goods_from_cart(goods_name)
-        # check the count decrease one
         assert self.home_proxy.home_handle.check_number_of_goods_in_cart() == count
-        # back to home page, then can repeat this process
         self.driver.back()
 
-
-
+    # Step 4: Logout
+    def test_logout(self):
+        """Test logout from the application"""
+        self.swag_labs_proxy.logout()

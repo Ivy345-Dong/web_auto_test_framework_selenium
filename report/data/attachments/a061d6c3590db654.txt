@@ -1,0 +1,2 @@
+INFO     test_framework:conftest.py:75 prepare to test: test_add_goods_to_cart[Sauce Labs Bolt T-Shirt-3]
+INFO     test_framework:conftest.py:82 clean test: test_add_goods_to_cart[Sauce Labs Bolt T-Shirt-3]

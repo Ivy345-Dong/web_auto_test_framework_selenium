@@ -1,7 +1,27 @@
 # conftest.py
 import pytest
 import logging
+from utility.driver_factory import DriverFactory
 
+def pytest_addoption(parser):
+    parser.addoption("--executor", action="store", default="local", help="local or grid")
+    parser.addoption("--browser", action="store", default="chrome", help="chrome, firefox, edge, safari")
+
+@pytest.fixture(scope="function")
+def driver_function(request):
+    executor = request.config.getoption("--executor")
+    browser = request.config.getoption("--browser")
+    driver = DriverFactory.get_web_driver(executor=executor, browser=browser)
+    yield driver
+    DriverFactory.quit_web_driver()
+
+@pytest.fixture(scope="class")
+def driver_class(request):
+    executor = request.config.getoption("--executor")
+    browser = request.config.getoption("--browser")
+    driver = DriverFactory.get_web_driver(executor=executor, browser=browser)
+    yield driver
+    DriverFactory.quit_web_driver()
 
 # Configure Logs
 def setup_logger():
