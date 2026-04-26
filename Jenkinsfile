@@ -1,14 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        // Python 虚拟环境路径
-        VENV_PATH = '.venv'
-
-        // Selenium Grid 地址
-        SELENIUM_GRID_URL = 'http://localhost:4444/wd/hub'
-    }
-
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timeout(time: 60, unit: 'MINUTES')
@@ -22,55 +14,24 @@ pipeline {
             }
         }
 
-        stage('Setup Python Environment') {
+        stage('Clean Workspace') {
             steps {
-                echo 'Setting up Python environment...'
-                sh '''
-                    # 检查 Python 版本
-                    python3 --version
+                echo 'Cleaning old results...'
+                // Windows command to delete folders
+                bat 'if exist allure-results-* rd /s /q allure-results-*'
+                bat 'if exist report rd /s /q report'
+            }
+        }
 
-                    # 创建虚拟环境（如果不存在）
-                    if [ ! -d "$VENV_PATH" ]; then
-                        echo "Creating virtual environment..."
-                        python3 -m venv $VENV_PATH
-                    fi
-
-                    # 激活虚拟环境并升级 pip
-                    echo "Activating virtual environment..."
-                    source $VENV_PATH/bin/activate
+        stage('Setup Python') {
+            steps {
+                echo 'Installing dependencies...'
+                // Create venv and install requirements
+                bat '''
+                    python -m venv .venv
+                    call .venv\\Scripts\\activate.bat
                     pip install --upgrade pip
-
-                    # 安装项目依赖（关键步骤！）
-                    echo "Installing dependencies from requirements.txt..."
                     pip install -r requirements.txt
-
-                    # 验证安装
-                    echo "Verifying installations..."
-                    pytest --version
-                    allure --version
-                '''
-            }
-        }
-
-        stage('Verify Selenium Grid') {
-            steps {
-                echo 'Checking Selenium Grid availability...'
-                sh '''
-                    curl -f $SELENIUM_GRID_URL/status || {
-                        echo "ERROR: Selenium Grid is not accessible"
-                        exit 1
-                    }
-                    echo "Selenium Grid is ready!"
-                '''
-            }
-        }
-
-        stage('Clean Previous Results') {
-            steps {
-                echo 'Cleaning previous test results...'
-                sh '''
-                    rm -rf allure-results-*
-                    rm -rf report
                 '''
             }
         }
@@ -80,36 +41,20 @@ pipeline {
                 stage('Chrome') {
                     steps {
                         echo 'Running Chrome tests...'
-                        sh '''
-                            source $VENV_PATH/bin/activate
-                            pytest --executor=grid --browser=chrome \
-                                --alluredir=allure-results-chrome \
-                                --color=no -v scripts/
-                        '''
+                        // Run pytest directly using the venv path
+                        bat '.venv\\Scripts\\pytest.exe --executor=grid --browser=chrome --alluredir=allure-results-chrome -v --color=no'
                     }
                 }
-
                 stage('Firefox') {
                     steps {
                         echo 'Running Firefox tests...'
-                        sh '''
-                            source $VENV_PATH/bin/activate
-                            pytest --executor=grid --browser=firefox \
-                                --alluredir=allure-results-firefox \
-                                --color=no -v scripts/
-                        '''
+                        bat '.venv\\Scripts\\pytest.exe --executor=grid --browser=firefox --alluredir=allure-results-firefox -v --color=no'
                     }
                 }
-
                 stage('Edge') {
                     steps {
                         echo 'Running Edge tests...'
-                        sh '''
-                            source $VENV_PATH/bin/activate
-                            pytest --executor=grid --browser=edge \
-                                --alluredir=allure-results-edge \
-                                --color=no -v scripts/
-                        '''
+                        bat '.venv\\Scripts\\pytest.exe --executor=grid --browser=edge --alluredir=allure-results-edge -v --color=no'
                     }
                 }
             }
@@ -118,13 +63,8 @@ pipeline {
         stage('Generate Report') {
             steps {
                 echo 'Generating Allure report...'
-                sh '''
-                    allure generate \
-                        allure-results-chrome \
-                        allure-results-firefox \
-                        allure-results-edge \
-                        -o ./report --clean
-                '''
+                // Ensure Allure is installed on your Windows machine
+                bat 'allure generate allure-results-chrome allure-results-firefox allure-results-edge -o report --clean'
             }
             post {
                 always {
@@ -136,21 +76,8 @@ pipeline {
                         reportFiles: 'index.html',
                         reportName: 'Allure Report'
                     ])
-                    archiveArtifacts artifacts: 'report/**/*', allowEmptyArchive: true
                 }
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'All tests passed!'
-        }
-        failure {
-            echo 'Tests failed! Check Allure report.'
-        }
-        always {
-            echo 'Pipeline completed.'
         }
     }
 }
