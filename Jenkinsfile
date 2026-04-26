@@ -225,7 +225,8 @@ pipeline {
         }
         always {
             echo "======================================"
-            echo "Pipeline finished at $(date)"
+            // 修改这里：使用 Groovy 标准语法获取当前时间
+            echo "Pipeline finished at ${new Date()}"
             echo "======================================"
         }
     }
