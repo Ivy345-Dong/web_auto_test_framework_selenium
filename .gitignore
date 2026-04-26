@@ -8,3 +8,4 @@ build/
 .pytest_cache/
 allure-results/
 allure-report/
+run_grid.ps1

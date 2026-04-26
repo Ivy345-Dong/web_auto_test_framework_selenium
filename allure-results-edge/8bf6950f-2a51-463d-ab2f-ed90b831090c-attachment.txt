@@ -1,0 +1,2 @@
+INFO     test_framework:conftest.py:83 prepare to test: test_logout
+INFO     test_framework:conftest.py:90 clean test: test_logout

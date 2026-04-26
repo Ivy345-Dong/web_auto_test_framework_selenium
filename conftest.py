@@ -1,4 +1,5 @@
 # conftest.py
+import allure
 import pytest
 import logging
 from utility.driver_factory import DriverFactory
@@ -58,6 +59,13 @@ def pytest_runtest_makereport(item, call):
 
     # record at the end of the test, if failed, record the error message
     elif report.when == "call":
+        # Add Dynamic Title & Browser Tag to allure report to distinguish test results
+        browser = item.config.getoption("--browser", default="unknown")
+        allure.dynamic.title(f"{item.originalname} [{browser.upper()}]")
+        allure.dynamic.label("browser", browser)
+        allure.dynamic.tag(browser)
+
+        #Logging test results
         if report.passed:
             logger.info(f"test passed: {item.nodeid}")
         elif report.failed:

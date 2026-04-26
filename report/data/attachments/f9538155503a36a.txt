@@ -1,2 +1,0 @@
-INFO     test_framework:conftest.py:75 prepare to test: test_remove_goods_from_cart[Sauce Labs Bike Light-1]
-INFO     test_framework:conftest.py:82 clean test: test_remove_goods_from_cart[Sauce Labs Bike Light-1]

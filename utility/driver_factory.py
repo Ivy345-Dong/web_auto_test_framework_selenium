@@ -54,7 +54,7 @@ class DriverFactory:
         elif executor == "grid":
             if browser == "chrome":
                 options = ChromeOptions()
-                options.add_argument("--headless=new")
+                #options.add_argument("--headless=new")
                 driver = webdriver.Remote(command_executor=grid_url, options=options)
             elif browser == "firefox":
                 options = FirefoxOptions()

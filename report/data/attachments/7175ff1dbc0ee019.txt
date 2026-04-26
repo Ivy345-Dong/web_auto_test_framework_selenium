@@ -1,2 +1,0 @@
-INFO     test_framework:conftest.py:75 prepare to test: test_login_success[standard_user-secret_sauce-Add to cart]
-INFO     test_framework:conftest.py:82 clean test: test_login_success[standard_user-secret_sauce-Add to cart]
