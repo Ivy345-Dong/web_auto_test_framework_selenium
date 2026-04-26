@@ -9,17 +9,18 @@ from utility.driver_factory import DriverFactory
 from utility.com import is_element_present
 
 
-@pytest.mark.usefixtures("driver_class")
 class TestShopping:
 
-    @classmethod
-    def setup_class(cls):
-        """Initialize page objects before all tests"""
-        cls.driver = DriverFactory.get_web_driver()
-        cls.home_proxy = HomeProxy()
-        cls.login_proxy = LoginProxy()
-        cls.cart_proxy = CartProxy()
-        cls.swag_labs_proxy = SwagLabsProxy()
+    @pytest.fixture(scope="class", autouse=True)
+    def _initialize_class(self, driver_class):
+        """Initialize once for the entire test class - share browser across all tests"""
+        # 使用 cls 设置类属性，保持一致性
+        cls = self.__class__
+        cls.driver = driver_class
+        cls.home_proxy = HomeProxy(driver_class)
+        cls.login_proxy = LoginProxy(driver_class)
+        cls.cart_proxy = CartProxy(driver_class)
+        cls.swag_labs_proxy = SwagLabsProxy(driver_class)
 
     # Step 1: Login
     def test_login(self):

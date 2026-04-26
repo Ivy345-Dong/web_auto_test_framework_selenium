@@ -11,81 +11,79 @@ from utility.data_reader import get_env_url
 
 
 class DriverFactory:
-    _web_driver = None #Define the browser driver
-    _remote_driver = None
     _logger = logging.getLogger('test_framework')
 
     #Define the browser driver for accessing web pages
     @classmethod
     def get_web_driver(cls, executor="local", browser="chrome", grid_url="http://localhost:4444/wd/hub"):
-        if cls._web_driver is None:
-            if executor == "local":
-                if browser == "chrome":
-                    options = ChromeOptions()
-                    options.add_argument("--no-sandbox")
-                    options.add_argument("--disable-dev-shm-usage")
-                    options.add_argument("--disable-gpu")
-                    options.add_argument("--disable-extensions")
-                    options.add_argument("--disable-default-apps")
-                    options.add_argument("--disable-background-networking")
-                    options.add_argument("--disable-sync")
-                    options.add_argument("--no-first-run")
-                    options.add_argument("--no-default-browser-check")
-                    options.add_argument("--disable-client-side-phishing-detection")
-                    options.add_argument("--disable-component-update")
-                    options.add_argument("--safebrowsing-disable-auto-update")
-                    options.add_argument("--disable-web-security")
-                    options.add_argument("--disk-cache-size=1073741824")
-                    options.add_argument("--enable-features=NetworkService,NetworkServiceInProcess")
-                    options.add_argument("--incognito")
-                    options.add_argument("--safebrowsing-disable-download-protection")
-                    options.add_argument("--safebrowsing-disable-extension-blacklist")
-                    #options.add_argument("--headless=new")
-                    cls._web_driver = webdriver.Chrome(options=options)
-                elif browser == "firefox":
-                    options = FirefoxOptions()
-                    options.add_argument("--headless")
-                    cls._web_driver = webdriver.Firefox(options=options)
-                elif browser == "edge":
-                    options = EdgeOptions()
-                    options.add_argument("--headless")
-                    cls._web_driver = webdriver.Edge(options=options)
-                elif browser == "safari":
-                    options = SafariOptions()
-                    cls._web_driver = webdriver.Safari(options=options)
-                else:
-                    raise ValueError(f"Unsupported browser: {browser}")
-            elif executor == "grid":
-                if browser == "chrome":
-                    options = ChromeOptions()
-                    options.add_argument("--headless=new")
-                    cls._web_driver = webdriver.Remote(command_executor=grid_url, options=options)
-                elif browser == "firefox":
-                    options = FirefoxOptions()
-                    options.add_argument("--headless")
-                    cls._web_driver = webdriver.Remote(command_executor=grid_url, options=options)
-                elif browser == "edge":
-                    options = EdgeOptions()
-                    options.add_argument("--headless")
-                    cls._web_driver = webdriver.Remote(command_executor=grid_url, options=options)
-                elif browser == "safari":
-                    options = SafariOptions()
-                    cls._web_driver = webdriver.Remote(command_executor=grid_url, options=options)
-                else:
-                    raise ValueError(f"Unsupported browser: {browser}")
+        if executor == "local":
+            if browser == "chrome":
+                options = ChromeOptions()
+                options.add_argument("--no-sandbox")
+                options.add_argument("--disable-dev-shm-usage")
+                options.add_argument("--disable-gpu")
+                options.add_argument("--disable-extensions")
+                options.add_argument("--disable-default-apps")
+                options.add_argument("--disable-background-networking")
+                options.add_argument("--disable-sync")
+                options.add_argument("--no-first-run")
+                options.add_argument("--no-default-browser-check")
+                options.add_argument("--disable-client-side-phishing-detection")
+                options.add_argument("--disable-component-update")
+                options.add_argument("--safebrowsing-disable-auto-update")
+                options.add_argument("--disable-web-security")
+                options.add_argument("--disk-cache-size=1073741824")
+                options.add_argument("--enable-features=NetworkService,NetworkServiceInProcess")
+                options.add_argument("--incognito")
+                options.add_argument("--safebrowsing-disable-download-protection")
+                options.add_argument("--safebrowsing-disable-extension-blacklist")
+                driver = webdriver.Chrome(options=options)
+            elif browser == "firefox":
+                options = FirefoxOptions()
+                options.add_argument("--headless")
+                driver = webdriver.Firefox(options=options)
+            elif browser == "edge":
+                options = EdgeOptions()
+                #options.add_argument("--headless")
+                driver = webdriver.Edge(options=options)
+            elif browser == "safari":
+                options = SafariOptions()
+                driver = webdriver.Safari(options=options)
             else:
-                raise ValueError(f"Unsupported executor: {executor}")
+                raise ValueError(f"Unsupported browser: {browser}")
+        elif executor == "grid":
+            if browser == "chrome":
+                options = ChromeOptions()
+                options.add_argument("--headless=new")
+                driver = webdriver.Remote(command_executor=grid_url, options=options)
+            elif browser == "firefox":
+                options = FirefoxOptions()
+                options.add_argument("--headless")
+                driver = webdriver.Remote(command_executor=grid_url, options=options)
+            elif browser == "edge":
+                options = EdgeOptions()
+                options.add_argument("--headless")
+                driver = webdriver.Remote(command_executor=grid_url, options=options)
+            elif browser == "safari":
+                options = SafariOptions()
+                driver = webdriver.Remote(command_executor=grid_url, options=options)
+            else:
+                raise ValueError(f"Unsupported browser: {browser}")
+        else:
+            raise ValueError(f"Unsupported executor: {executor}")
 
-            cls._web_driver.maximize_window()
-            cls._web_driver.get(get_env_url())
-        return cls._web_driver
+        driver.maximize_window()
+        driver.get(get_env_url())
+        return driver
 
     #Define the browser driver for exiting the web page
     @classmethod
-    def quit_web_driver(cls):
-        if cls._web_driver is not None:
-            cls._web_driver.quit()
-            cls._web_driver = None
+    def quit_web_driver(cls, driver):
+        if driver is not None:
+            try:
+                driver.quit()
+            except Exception as e:
+                cls._logger.warning(f"Error quitting driver: {e}")
             cls._kill_chromedriver_only()
 
     @classmethod

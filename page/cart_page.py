@@ -15,8 +15,8 @@ class CartPage(BasePage):
     # remove button
     REOMVE_BUTTON = By.CSS_SELECTOR, "[data-test='remove-{}']"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, driver=None):
+        super().__init__(driver)
 
 
     # add to cart button
@@ -29,8 +29,8 @@ class CartPage(BasePage):
 
 #define operations class
 class CartHandle(BaseHandle):
-    def __init__(self):
-        self.cart_page = CartPage()
+    def __init__(self, driver=None):
+        self.cart_page = CartPage(driver)
 
     @allure.step(title="choose a goods and remove from cart")
     def remove_from_cart_with_goods_name(self, goods_name):
@@ -39,8 +39,8 @@ class CartHandle(BaseHandle):
 
 #define business actions
 class CartProxy:
-    def __init__(self):
-        self.cart_handle = CartHandle()
+    def __init__(self, driver=None):
+        self.cart_handle = CartHandle(driver)
 
     @allure.step(title="remove goods from cart and check number")
     def remove_goods_from_cart(self, goods_name):

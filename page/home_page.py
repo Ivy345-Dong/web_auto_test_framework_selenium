@@ -17,8 +17,8 @@ class HomePage(BasePage):
     # cart badge that can show the number of the goods in cart
     CART_BADGE = By.CSS_SELECTOR, "[data-test='shopping-cart-badge']"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self,driver=None):
+        super().__init__(driver)
 
 
     # add to cart button
@@ -38,8 +38,8 @@ class HomePage(BasePage):
 
 #define operations class
 class HomeHandle(BaseHandle):
-    def __init__(self):
-        self.home_page = HomePage()
+    def __init__(self, driver=None):
+        self.home_page = HomePage(driver)
 
     @allure.step(title="choose a goods and add to cart")
     def add_to_cart_with_goods_name(self, goods_name):
@@ -57,8 +57,8 @@ class HomeHandle(BaseHandle):
 
 #define business actions
 class HomeProxy:
-    def __init__(self):
-        self.home_handle = HomeHandle()
+    def __init__(self, driver=None):
+        self.home_handle = HomeHandle(driver)
 
     @allure.step(title="add goods to cart and check number")
     def add_goods_to_cart_and_check_number(self, goods_name):

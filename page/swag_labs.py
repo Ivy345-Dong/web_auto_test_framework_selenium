@@ -16,8 +16,8 @@ class SwagLabs(BasePage):
     #logout button
     LOGOUT_BUTTON = By.CSS_SELECTOR, "#logout_sidebar_link"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, driver=None):
+        super().__init__(driver)
 
     def find_menu_button(self):
         return self.get_element(self.MENU_BUTTON)
@@ -28,8 +28,8 @@ class SwagLabs(BasePage):
 
 #define operations class
 class SwagLabsHandle(BaseHandle):
-    def __init__(self):
-        self.swag_labs_page = SwagLabs()
+    def __init__(self, driver=None):
+        self.swag_labs_page = SwagLabs(driver)
 
     @allure.step(title="click menu button")
     def click_menu_button(self):
@@ -42,8 +42,8 @@ class SwagLabsHandle(BaseHandle):
 
 #define business actions
 class SwagLabsProxy:
-    def __init__(self):
-        self.swag_labs_handle = SwagLabsHandle()
+    def __init__(self, driver=None):
+        self.swag_labs_handle = SwagLabsHandle(driver)
 
     @allure.step(title="logout from swag labs")
     def logout(self):

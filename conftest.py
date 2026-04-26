@@ -13,7 +13,7 @@ def driver_function(request):
     browser = request.config.getoption("--browser")
     driver = DriverFactory.get_web_driver(executor=executor, browser=browser)
     yield driver
-    DriverFactory.quit_web_driver()
+    DriverFactory.quit_web_driver(driver)
 
 @pytest.fixture(scope="class")
 def driver_class(request):
@@ -21,7 +21,7 @@ def driver_class(request):
     browser = request.config.getoption("--browser")
     driver = DriverFactory.get_web_driver(executor=executor, browser=browser)
     yield driver
-    DriverFactory.quit_web_driver()
+    DriverFactory.quit_web_driver(driver)
 
 # Configure Logs
 def setup_logger():

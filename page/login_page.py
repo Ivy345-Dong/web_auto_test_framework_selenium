@@ -16,8 +16,8 @@ class LoginPage(BasePage):
     # login button
     LOGIN_BUTTON = By.CSS_SELECTOR, "#login-button"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, driver=None):
+        super().__init__(driver)
 
 
     # find username input
@@ -34,8 +34,8 @@ class LoginPage(BasePage):
 
 #define operations class
 class LoginHandle(BaseHandle):
-    def __init__(self):
-        self.login_page = LoginPage()
+    def __init__(self, driver=None):
+        self.login_page = LoginPage(driver)
 
     @allure.step(title="input username")
     def input_username(self, username):
@@ -52,8 +52,8 @@ class LoginHandle(BaseHandle):
 
 ##define business actions
 class LoginProxy:
-    def __init__(self):
-        self.login_handle = LoginHandle()
+    def __init__(self, driver=None):
+        self.login_handle = LoginHandle(driver)
 
     @allure.step(title="login with username and password")
     def login(self, username, password):

@@ -10,8 +10,8 @@ from utility.driver_factory import DriverFactory
 
 
 class BasePage:
-    def __init__(self):
-        self.driver = DriverFactory.get_web_driver() #获取web浏览器驱动
+    def __init__(self, driver=None):
+        self.driver = driver if driver else DriverFactory.get_web_driver()
 
     def get_element(self, location):
         wait = WebDriverWait(self.driver,10,1)
@@ -27,6 +27,10 @@ class BasePage:
 
 class BaseHandle:
 
+
+    def __init__(self, driver=None):
+        self.base_page = BasePage(driver)
+
     # 输入文本
     # define a method to input text
     def input_text(self, element, text):
@@ -34,6 +38,7 @@ class BaseHandle:
         element.send_keys(text)
         time.sleep(1)
 
+    '''
     # 定义一个web浏览器的边滚动边查找
     def web_scroll_find(self, direct, location):
         """
@@ -60,7 +65,7 @@ class BaseHandle:
                 print("can not find element")
                 allure.attach(self.driver.get_screenshot_as_png(), "没有找到元素截图", allure.attachment_type.PNG)
                 return False
-
+    '''
     # 切换窗口
     def change_window(self, handle):
         """

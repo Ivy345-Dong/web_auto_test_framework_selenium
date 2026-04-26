@@ -11,17 +11,12 @@ from utility.com import is_element_present
 class TestLogin:
 
     @pytest.fixture(autouse=True)
-    def setup_method(self):
+    def setup_method(self, driver_function):
         """为每个测试方法创建独立的浏览器实例"""
         # 打开浏览器
-        self.driver = DriverFactory.get_web_driver()
-        self.login_proxy = LoginProxy()
-        self.swag_labs_proxy = SwagLabsProxy()
-
-        yield
-
-        # 关闭浏览器
-        DriverFactory.quit_web_driver()
+        self.driver = driver_function
+        self.login_proxy = LoginProxy(self.driver)
+        self.swag_labs_proxy = SwagLabsProxy(self.driver)
 
     # test login successfully
     @pytest.mark.parametrize("username, password, keywords",
