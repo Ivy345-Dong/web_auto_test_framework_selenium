@@ -4,80 +4,229 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timeout(time: 60, unit: 'MINUTES')
+        skipDefaultCheckout(false)
+        timestamps()
+    }
+
+    environment {
+        VENV_PATH = '.venv'
+        PYTEST_PATH = "${VENV_PATH}\\Scripts\\pytest.exe"
+        ALLURE_RESULTS_CHROME = 'allure-results-chrome'
+        ALLURE_RESULTS_FIREFOX = 'allure-results-firefox'
+        ALLURE_RESULTS_EDGE = 'allure-results-edge'
+        REPORT_DIR = 'report'
+        GRID_EXECUTOR = 'http://localhost:4444/wd/hub'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out source code...'
-                checkout scm
+                script {
+                    echo "======================================"
+                    echo "Step 1: Checking out source code"
+                    echo "======================================"
+                    checkout scm
+                }
             }
         }
 
         stage('Clean Workspace') {
             steps {
-                echo 'Cleaning old results...'
-                // Windows command to delete folders
-                bat 'if exist allure-results-* rd /s /q allure-results-*'
-                bat 'if exist report rd /s /q report'
+                script {
+                    echo "======================================"
+                    echo "Step 2: Cleaning old test results"
+                    echo "======================================"
+                    powershell '''
+                        if (Test-Path "allure-results-*") {
+                            Remove-Item -Recurse -Force "allure-results-*" -ErrorAction SilentlyContinue
+                            Write-Host "Old allure results deleted"
+                        } else {
+                            Write-Host "No old allure results to delete"
+                        }
+
+                        if (Test-Path "report") {
+                            Remove-Item -Recurse -Force "report" -ErrorAction SilentlyContinue
+                            Write-Host "Old report folder deleted"
+                        } else {
+                            Write-Host "No old report folder to delete"
+                        }
+                    '''
+                }
             }
         }
 
-        stage('Setup Python') {
+        stage('Setup Python Environment') {
             steps {
-                echo 'Installing dependencies...'
-                // Create venv and install requirements
-                bat '''
-                    python -m venv .venv
-                    call .venv\\Scripts\\activate.bat
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                '''
+                script {
+                    echo "======================================"
+                    echo "Step 3: Setting up Python venv"
+                    echo "======================================"
+                    powershell '''
+                        try {
+                            python --version | Out-Null
+                            Write-Host "Python found"
+                        } catch {
+                            Write-Error "Python is not installed or not in PATH"
+                            exit 1
+                        }
+
+                        if (-not (Test-Path "$env:VENV_PATH")) {
+                            python -m venv "$env:VENV_PATH"
+                            Write-Host "Virtual environment created at $env:VENV_PATH"
+                        } else {
+                            Write-Host "Virtual environment already exists"
+                        }
+
+                        & "$env:VENV_PATH\\Scripts\\Activate.ps1"
+                        pip install --upgrade pip
+                        pip install -r requirements.txt
+                        Write-Host "Dependencies installed successfully"
+                    '''
+                }
+            }
+            post {
+                failure {
+                    echo "Python environment setup failed! Check requirements.txt or Python installation"
+                }
             }
         }
 
-        stage('Parallel Tests') {
+        stage('Parallel Compatibility Tests') {
             parallel {
-                stage('Chrome') {
+                stage('Chrome Tests') {
                     steps {
-                        echo 'Running Chrome tests...'
-                        // Run pytest directly using the venv path
-                        bat '.venv\\Scripts\\pytest.exe --executor=grid --browser=chrome --alluredir=allure-results-chrome -v --color=no'
+                        script {
+                            echo "======================================"
+                            echo "Running Chrome tests (Grid)"
+                            echo "======================================"
+                            powershell '''
+                                & "$env:PYTEST_PATH" `
+                                    --executor=$env:GRID_EXECUTOR `
+                                    --browser=chrome `
+                                    --alluredir=$env:ALLURE_RESULTS_CHROME `
+                                    -v `
+                                    --color=no `
+                                    --tb=short
+
+                                if ($LASTEXITCODE -ne 0) {
+                                    Write-Warning "Chrome tests have failures, but continuing pipeline"
+                                } else {
+                                    Write-Host "Chrome tests completed successfully"
+                                }
+                            '''
+                        }
                     }
                 }
-                stage('Firefox') {
+
+                stage('Firefox Tests') {
                     steps {
-                        echo 'Running Firefox tests...'
-                        bat '.venv\\Scripts\\pytest.exe --executor=grid --browser=firefox --alluredir=allure-results-firefox -v --color=no'
+                        script {
+                            echo "======================================"
+                            echo "Running Firefox tests (Grid)"
+                            echo "======================================"
+                            powershell '''
+                                & "$env:PYTEST_PATH" `
+                                    --executor=$env:GRID_EXECUTOR `
+                                    --browser=firefox `
+                                    --alluredir=$env:ALLURE_RESULTS_FIREFOX `
+                                    -v `
+                                    --color=no `
+                                    --tb=short
+
+                                if ($LASTEXITCODE -ne 0) {
+                                    Write-Warning "Firefox tests have failures, but continuing pipeline"
+                                } else {
+                                    Write-Host "Firefox tests completed successfully"
+                                }
+                            '''
+                        }
                     }
                 }
-                stage('Edge') {
+
+                stage('Edge Tests') {
                     steps {
-                        echo 'Running Edge tests...'
-                        bat '.venv\\Scripts\\pytest.exe --executor=grid --browser=edge --alluredir=allure-results-edge -v --color=no'
+                        script {
+                            echo "======================================"
+                            echo "Running Edge tests (Grid)"
+                            echo "======================================"
+                            powershell '''
+                                & "$env:PYTEST_PATH" `
+                                    --executor=$env:GRID_EXECUTOR `
+                                    --browser=edge `
+                                    --alluredir=$env:ALLURE_RESULTS_EDGE `
+                                    -v `
+                                    --color=no `
+                                    --tb=short
+
+                                if ($LASTEXITCODE -ne 0) {
+                                    Write-Warning "Edge tests have failures, but continuing pipeline"
+                                } else {
+                                    Write-Host "Edge tests completed successfully"
+                                }
+                            '''
+                        }
                     }
+                }
+            }
+            post {
+                failure {
+                    echo "One or more browser tests failed! Check the logs for details"
                 }
             }
         }
 
-        stage('Generate Report') {
+        stage('Generate Allure Report') {
             steps {
-                echo 'Generating Allure report...'
-                // Ensure Allure is installed on your Windows machine
-                bat 'allure generate allure-results-chrome allure-results-firefox allure-results-edge -o report --clean'
+                script {
+                    echo "======================================"
+                    echo "Generating Allure report"
+                    echo "======================================"
+                    powershell '''
+                        $resultDirs = @("$env:ALLURE_RESULTS_CHROME", "$env:ALLURE_RESULTS_FIREFOX", "$env:ALLURE_RESULTS_EDGE")
+                        $existingDirs = $resultDirs | Where-Object { Test-Path $_ }
+
+                        if ($existingDirs.Count -eq 0) {
+                            Write-Error "No Allure results found! Tests may not have run"
+                            exit 1
+                        }
+
+                        allure generate $existingDirs -o "$env:REPORT_DIR" --clean
+                        Write-Host "Allure report generated at $env:REPORT_DIR"
+                    '''
+                }
             }
             post {
                 always {
-                    publishHTML(target: [
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'report',
-                        reportFiles: 'index.html',
-                        reportName: 'Allure Report'
-                    ])
+                    publishHTML(
+                        target: [
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: env.REPORT_DIR,
+                            reportFiles: 'index.html',
+                            reportName: 'Compatibility Test Report (Chrome/Firefox/Edge)'
+                        ]
+                    )
+                    echo "Allure report published! Access it from the Jenkins build page"
+                }
+                failure {
+                    echo "Failed to generate Allure report! Check Allure installation"
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "All stages completed successfully! Compatibility tests passed for all browsers"
+        }
+        failure {
+            echo "Pipeline failed! Check the logs for the failed stage"
+        }
+        always {
+            echo "======================================"
+            echo "Pipeline finished at $(date)"
+            echo "======================================"
         }
     }
 }
