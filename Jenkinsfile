@@ -101,7 +101,7 @@ pipeline {
                             echo "======================================"
                             powershell '''
                                 & "$env:PYTEST_PATH" `
-                                    --executor=$env:GRID_EXECUTOR `
+                                    --executor=grid `
                                     --browser=chrome `
                                     --alluredir=$env:ALLURE_RESULTS_CHROME `
                                     -v `
@@ -126,7 +126,7 @@ pipeline {
                             echo "======================================"
                             powershell '''
                                 & "$env:PYTEST_PATH" `
-                                    --executor=$env:GRID_EXECUTOR `
+                                    --executor=grid `
                                     --browser=firefox `
                                     --alluredir=$env:ALLURE_RESULTS_FIREFOX `
                                     -v `
@@ -151,7 +151,7 @@ pipeline {
                             echo "======================================"
                             powershell '''
                                 & "$env:PYTEST_PATH" `
-                                    --executor=$env:GRID_EXECUTOR `
+                                    --executor=grid `
                                     --browser=edge `
                                     --alluredir=$env:ALLURE_RESULTS_EDGE `
                                     -v `
