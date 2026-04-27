@@ -6,14 +6,6 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         // Timeout the entire pipeline after 60 minutes
         timeout(time: 60, unit: 'MINUTES')
-        // Add Allure report trend chart (uses Allure from system PATH)
-        allure([
-        includeProperties: false,
-        jdk: '',
-        properties: [],
-        reportBuildPolicy: 'ALWAYS',
-        results: [[path: 'allure-results-*']]
-        ])
     }
 
     environment {
