@@ -19,9 +19,9 @@ pipeline {
             steps {
                 script {
                     echo "Step 1: Cleaning old data..."
-                    // Remove old allure results and reports
-                    bat "if exist allure-results-* rmdir /s /q allure-results-*"
-                    bat "if exist report rmdir /s /q report"
+                    // Remove old allure results and reports using PowerShell (supports wildcards)
+                    powershell "Remove-Item -Recurse -Force allure-results* -ErrorAction SilentlyContinue"
+                    powershell "Remove-Item -Recurse -Force report -ErrorAction SilentlyContinue"
                     echo "Cleaning complete."
                 }
             }
