@@ -20,7 +20,7 @@ class TestShopping:
         cls.swag_labs_proxy = SwagLabsProxy(driver_class)
 
     @pytest.mark.parametrize("goods_name1, goods_name2, add_count, left_count",
-                             get_json_data(r"D:\my_files\projects\saucedemo\data\test_add_to_cart.json"))
+                             get_json_data(r".\data\test_add_to_cart.json"))
     def test_add_goods_to_cart(self, goods_name1, goods_name2, add_count, left_count):
         #login website
         self.login_proxy.login("standard_user", "secret_sauce")
