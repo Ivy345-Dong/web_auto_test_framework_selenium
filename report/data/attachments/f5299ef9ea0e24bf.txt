@@ -1,2 +1,0 @@
-INFO     test_framework:conftest.py:83 prepare to test: test_login_failed[standard_user-secret_sauce22-Epic sadface: Username and password do not match any user in this service]
-INFO     test_framework:conftest.py:90 clean test: test_login_failed[standard_user-secret_sauce22-Epic sadface: Username and password do not match any user in this service]
