@@ -1,2 +1,0 @@
-INFO     test_framework:conftest.py:83 prepare to test: test_login_failed[-secret_sauce-Epic sadface: Username is required]
-INFO     test_framework:conftest.py:90 clean test: test_login_failed[-secret_sauce-Epic sadface: Username is required]
