@@ -15,10 +15,12 @@ class DriverFactory:
 
     #Define the browser driver for accessing web pages
     @classmethod
-    def get_web_driver(cls, executor="local", browser="chrome", grid_url="http://localhost:4444/wd/hub"):
+    def get_web_driver(cls, executor="local", headless=False, browser="chrome", grid_url="http://localhost:4444/wd/hub"):
         if executor == "local":
             if browser == "chrome":
                 options = ChromeOptions()
+                if headless:
+                    options.add_argument("--headless=new")
                 options.add_argument("--no-sandbox")
                 options.add_argument("--disable-dev-shm-usage")
                 options.add_argument("--disable-gpu")
@@ -40,32 +42,41 @@ class DriverFactory:
                 driver = webdriver.Chrome(options=options)
             elif browser == "firefox":
                 options = FirefoxOptions()
-                options.add_argument("--headless")
+                if headless:
+                    options.add_argument("--headless=new")
                 driver = webdriver.Firefox(options=options)
             elif browser == "edge":
                 options = EdgeOptions()
-                #options.add_argument("--headless")
+                if headless:
+                    options.add_argument("--headless=new")
                 driver = webdriver.Edge(options=options)
             elif browser == "safari":
                 options = SafariOptions()
+                if headless:
+                    options.add_argument("--headless=new")
                 driver = webdriver.Safari(options=options)
             else:
                 raise ValueError(f"Unsupported browser: {browser}")
         elif executor == "grid":
             if browser == "chrome":
                 options = ChromeOptions()
-                #options.add_argument("--headless=new")
+                if headless:
+                    options.add_argument("--headless=new")
                 driver = webdriver.Remote(command_executor=grid_url, options=options)
             elif browser == "firefox":
                 options = FirefoxOptions()
-                options.add_argument("--headless")
+                if headless:
+                    options.add_argument("--headless=new")
                 driver = webdriver.Remote(command_executor=grid_url, options=options)
             elif browser == "edge":
                 options = EdgeOptions()
-                options.add_argument("--headless")
+                if headless:
+                    options.add_argument("--headless=new")
                 driver = webdriver.Remote(command_executor=grid_url, options=options)
             elif browser == "safari":
                 options = SafariOptions()
+                if headless:
+                    options.add_argument("--headless=new")
                 driver = webdriver.Remote(command_executor=grid_url, options=options)
             else:
                 raise ValueError(f"Unsupported browser: {browser}")

@@ -1,4 +1,4 @@
-# run_local.ps1 - 本地运行脚本（单浏览器）
+# run_local.ps1 - Local execution script (single browser)
 
 $PytestPath = Join-Path -Path $PSScriptRoot -ChildPath '.\.venv\Scripts\pytest.exe'
 $ProjectRoot = $PSScriptRoot

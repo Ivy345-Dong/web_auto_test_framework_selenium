@@ -1,4 +1,4 @@
-# 定义测试登录类
+# Test login class
 import pytest
 
 from page.swag_labs import SwagLabsProxy
@@ -12,8 +12,7 @@ class TestLogin:
 
     @pytest.fixture(autouse=True)
     def setup_method(self, driver_function):
-        """为每个测试方法创建独立的浏览器实例"""
-        # 打开浏览器
+        """Create independent browser instance for each test method"""
         self.driver = driver_function
         self.login_proxy = LoginProxy(self.driver)
         self.swag_labs_proxy = SwagLabsProxy(self.driver)

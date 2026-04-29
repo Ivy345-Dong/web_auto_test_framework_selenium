@@ -1,4 +1,4 @@
-#定义web测试的基类
+# Define base class for web testing
 import time
 
 import allure
@@ -18,11 +18,11 @@ class BasePage:
         element = wait.until(EC.presence_of_element_located(location))
         return element
 
-    #鼠标悬停元素
+    # Mouse hover element
     def stay_element(self, element):
         action = ActionChains(self.driver)
-        action.move_to_element(element)  # 鼠标移动到制定元素上悬停
-        action.perform()  # 执行悬停操作
+        action.move_to_element(element)  # Move mouse to specified element and hover
+        action.perform()  # Execute hover operation
         time.sleep(3)
 
 class BaseHandle:
@@ -31,10 +31,10 @@ class BaseHandle:
     def __init__(self, driver=None):
         self.base_page = BasePage(driver)
 
-    # 输入文本
+    # Input text
     # define a method to input text
     def input_text(self, element, text):
-        element.clear() #清空输入框
+        element.clear() # Clear input field
         element.send_keys(text)
         time.sleep(1)
 
@@ -66,7 +66,7 @@ class BaseHandle:
                 allure.attach(self.driver.get_screenshot_as_png(), "没有找到元素截图", allure.attachment_type.PNG)
                 return False
     '''
-    # 切换窗口
+    # Switch window
     def change_window(self, handle):
         """
 

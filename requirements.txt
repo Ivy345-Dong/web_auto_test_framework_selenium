@@ -5,3 +5,4 @@ pytest-xdist==3.8.0
 pyyaml
 webdriver-manager
 pytest-rerunfailures==16.1
+

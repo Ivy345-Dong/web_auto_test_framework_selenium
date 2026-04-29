@@ -1,42 +1,41 @@
-#首页页面对象
 import time
 import allure
 from selenium.webdriver.common.by import By
 from base.base import BasePage, BaseHandle
 
 
-#define locators class
+# Define locators class
 class HomePage(BasePage):
     """Page object for Home page"""
 
     #Locators
-    # add to cart button
+    # Add to cart button
     ADD_TO_CART_BUTTON = By.CSS_SELECTOR, "[data-test='add-to-cart-{}']"
-    # cart icon
+    # Cart icon
     CART_ICON = By.CSS_SELECTOR, "[data-test='shopping-cart-link']"
-    # cart badge that can show the number of the goods in cart
+    # Cart badge that shows the number of goods in cart
     CART_BADGE = By.CSS_SELECTOR, "[data-test='shopping-cart-badge']"
 
     def __init__(self,driver=None):
         super().__init__(driver)
 
 
-    # add to cart button
+    # Add to cart button
     def find_add_to_cart_button(self, goods_name):
         goods_name_changed = goods_name.lower().replace(" ", "-")
         locator = self.ADD_TO_CART_BUTTON[0], self.ADD_TO_CART_BUTTON[1].format(goods_name_changed)
         return self.get_element(locator)
 
-    # find cart icon
+    # Find cart icon
     def find_cart_icon(self):
         return self.get_element(self.CART_ICON)
 
-    # find cart badge
+    # Find cart badge
     def find_cart_badge(self):
         return self.get_element(self.CART_BADGE)
 
 
-#define operations class
+# Define operations class
 class HomeHandle(BaseHandle):
     def __init__(self, driver=None):
         self.home_page = HomePage(driver)
@@ -55,7 +54,7 @@ class HomeHandle(BaseHandle):
         self.home_page.find_cart_icon().click()
 
 
-#define business actions
+# Define business actions
 class HomeProxy:
     def __init__(self, driver=None):
         self.home_handle = HomeHandle(driver)
@@ -63,7 +62,6 @@ class HomeProxy:
     @allure.step(title="add goods to cart and check number")
     def add_goods_to_cart_and_check_number(self, goods_name):
         self.home_handle.add_to_cart_with_goods_name(goods_name)
-        #wait for the cart badge updating number
+        # Wait for the cart badge to update number
         time.sleep(2)
         return self.home_handle.check_number_of_goods_in_cart()
-

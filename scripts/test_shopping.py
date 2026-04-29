@@ -9,15 +9,16 @@ from page.login_page import LoginProxy
 
 class TestShopping:
 
-    @pytest.fixture(scope="class", autouse=True)
-    def _initialize_class(self, driver_class):
-        """Initialize once for the entire test class - share browser across all tests"""
-        cls = self.__class__
-        cls.driver = driver_class
-        cls.home_proxy = HomeProxy(driver_class)
-        cls.login_proxy = LoginProxy(driver_class)
-        cls.cart_proxy = CartProxy(driver_class)
-        cls.swag_labs_proxy = SwagLabsProxy(driver_class)
+    @pytest.fixture(autouse=True)
+    def setup_method(self, driver_function):
+        """Create independent browser instance for each test method"""
+        self.driver = driver_function
+        self.home_proxy = HomeProxy(self.driver)
+        self.login_proxy = LoginProxy(self.driver)
+        self.swag_labs_proxy = SwagLabsProxy(self.driver)
+        self.cart_proxy = CartProxy(self.driver)
+
+
 
     @pytest.mark.parametrize("goods_name1, goods_name2, add_count, left_count",
                              get_json_data(r".\data\test_add_to_cart.json"))

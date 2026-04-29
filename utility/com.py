@@ -4,7 +4,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 
-# 封装一个元素是否存在的方法
+# Encapsulate a method to check if an element exists
 def is_element_present(driver, text, timeout=10):
     """
     Check if an element with the given text exists on the page.

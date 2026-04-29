@@ -1,116 +1,125 @@
 pipeline {
     agent any
 
-    options {
-        // Keep only the last 10 builds to save disk space
-        buildDiscarder(logRotator(numToKeepStr: '10'))
-        // Timeout the entire pipeline after 60 minutes
-        timeout(time: 60, unit: 'MINUTES')
-    }
-
     environment {
-        // Path to pytest in virtual environment
-        PYTEST_PATH = "${WORKSPACE}\\.venv\\Scripts\\pytest.exe"
-        PROJECT_ROOT = "${WORKSPACE}"
+        PYTHON_PATH = '.venv/Scripts/python.exe'
+        PYTEST_PATH = '.venv/Scripts/pytest.exe'
+        GRID_URL = 'http://localhost:4444/wd/hub'
     }
 
     stages {
-        stage('Setup') {
+        stage('Clean Old Data') {
             steps {
-                script {
-                    echo "Step 1: Cleaning old data..."
-                    // Remove old allure results and reports using PowerShell (supports wildcards)
-                    powershell "Remove-Item -Recurse -Force allure-results* -ErrorAction SilentlyContinue"
-                    powershell "Remove-Item -Recurse -Force report -ErrorAction SilentlyContinue"
-                    echo "Cleaning complete."
-                }
+                echo 'Step 1: Cleaning old data...'
+                sh '''
+                    rm -rf allure-results-chrome
+                    rm -rf allure-results-firefox
+                    rm -rf allure-results-edge
+                    rm -rf report-chrome
+                    rm -rf report-firefox
+                    rm -rf report-edge
+                '''
+                echo 'Cleaning complete.'
             }
         }
 
-        stage('Run Parallel Tests') {
+        stage('Run Parallel Grid Tests') {
             parallel {
                 stage('Chrome Tests') {
                     steps {
-                        script {
-                            echo "Running Chrome tests..."
-                            bat "\"%PYTEST_PATH%\" --executor=grid --browser=chrome --alluredir=allure-results-chrome -v"
-                        }
+                        echo 'Running Chrome tests...'
+                        sh '${PYTEST_PATH} --executor=grid --browser=chrome --alluredir=allure-results-chrome -v'
                     }
                 }
 
                 stage('Firefox Tests') {
                     steps {
-                        script {
-                            echo "Running Firefox tests..."
-                            bat "\"%PYTEST_PATH%\" --executor=grid --browser=firefox --alluredir=allure-results-firefox -v"
-                        }
+                        echo 'Running Firefox tests...'
+                        sh '${PYTEST_PATH} --executor=grid --browser=firefox --alluredir=allure-results-firefox -v'
                     }
                 }
 
                 stage('Edge Tests') {
                     steps {
-                        script {
-                            echo "Running Edge tests..."
-                            bat "\"%PYTEST_PATH%\" --executor=grid --browser=edge --alluredir=allure-results-edge -v"
-                        }
+                        echo 'Running Edge tests...'
+                        sh '${PYTEST_PATH} --executor=grid --browser=edge --alluredir=allure-results-edge -v'
                     }
                 }
             }
         }
 
-        stage('Verify Results') {
+        stage('Generate Reports') {
             steps {
+                echo 'Step 3: Generating Reports...'
+
                 script {
-                    echo "Step 3: Verifying test results..."
+                    // Generate Chrome report
+                    sh '''
+                        if [ -d "allure-results-chrome" ]; then
+                            echo "Generating Chrome report..."
+                            allure generate allure-results-chrome -o ./report-chrome --clean
+                            echo "Chrome report generated successfully!"
+                        else
+                            echo "WARNING: allure-results-chrome not found!"
+                        fi
+                    '''
 
-                    def chromeExists = fileExists 'allure-results-chrome'
-                    def firefoxExists = fileExists 'allure-results-firefox'
-                    def edgeExists = fileExists 'allure-results-edge'
+                    // Generate Firefox report
+                    sh '''
+                        if [ -d "allure-results-firefox" ]; then
+                            echo "Generating Firefox report..."
+                            allure generate allure-results-firefox -o ./report-firefox --clean
+                            echo "Firefox report generated successfully!"
+                        else
+                            echo "WARNING: allure-results-firefox not found!"
+                        fi
+                    '''
 
-                    echo "Chrome results: ${chromeExists ? 'Found' : 'Missing'}"
-                    echo "Firefox results: ${firefoxExists ? 'Found' : 'Missing'}"
-                    echo "Edge results: ${edgeExists ? 'Found' : 'Missing'}"
-
-                    if (!chromeExists || !firefoxExists || !edgeExists) {
-                        echo "WARNING: Some browser results are missing!"
-                    }
+                    // Generate Edge report
+                    sh '''
+                        if [ -d "allure-results-edge" ]; then
+                            echo "Generating Edge report..."
+                            allure generate allure-results-edge -o ./report-edge --clean
+                            echo "Edge report generated successfully!"
+                        else
+                            echo "WARNING: allure-results-edge not found!"
+                        fi
+                    '''
                 }
+
+                echo 'Reports generated in separate directories:'
+                echo '  Chrome: report-chrome'
+                echo '  Firefox: report-firefox'
+                echo '  Edge: report-edge'
             }
         }
 
-        stage('Generate Report') {
+        stage('Publish Allure Reports') {
             steps {
-                script {
-                    echo "Step 4: Allure results collected. Report will be generated by Allure plugin..."
-                    // The Allure plugin will automatically generate and publish the report
-                    echo "Report will be available in Jenkins UI after build completes."
-                }
-            }
-        }
-
-        stage('Archive Artifacts') {
-            steps {
-                script {
-                    echo "Step 5: Archiving test results for debugging..."
-                    // Archive individual browser results for debugging
-                    archiveArtifacts artifacts: 'allure-results-*/**/*', allowEmptyArchive: true
-                }
+                echo 'Publishing Allure reports...'
+                allure([
+                    includeProperties: false,
+                    jdk: '',
+                    properties: [],
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [[path: 'allure-results-chrome'], [path: 'allure-results-firefox'], [path: 'allure-results-edge']]
+                ])
             }
         }
     }
 
     post {
         always {
-            script {
-                echo "Pipeline execution completed."
-            }
-            allure includeProperties: false, jdk: '', properties: [], reportBuildPolicy: 'ALWAYS', results: [[path: 'allure-results-*']]
+            echo 'Grid execution completed!'
+            archiveArtifacts artifacts: 'report-*/**', allowEmptyArchive: true
         }
+
         success {
-            echo "All tests completed successfully!"
+            echo 'All tests passed successfully!'
         }
+
         failure {
-            echo "Pipeline failed. Check the logs for details."
+            echo 'Some tests failed. Please check the reports.'
         }
     }
 }

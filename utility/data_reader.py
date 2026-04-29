@@ -3,12 +3,12 @@ import yaml
 import os
 
 
-#定义测试用例参数化读取json文件数据的方法
+# Define method to read JSON file data for test case parameterization
 def get_json_data(filename):
     """
 
-    :param filename: 文件路径及文件名称
-    :return: 返回数据列表
+    :param filename: File path and file name
+    :return: Return data list
     """
     data_list = []
     with open(filename, 'r', encoding='utf-8') as f:

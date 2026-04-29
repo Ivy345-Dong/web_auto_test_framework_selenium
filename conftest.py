@@ -7,12 +7,14 @@ from utility.driver_factory import DriverFactory
 def pytest_addoption(parser):
     parser.addoption("--executor", action="store", default="local", help="local or grid")
     parser.addoption("--browser", action="store", default="chrome", help="chrome, firefox, edge, safari")
+    parser.addoption("--headless", action="store_true", default=False, help="Run tests in headless mode")
 
 @pytest.fixture(scope="function")
 def driver_function(request):
     executor = request.config.getoption("--executor")
     browser = request.config.getoption("--browser")
-    driver = DriverFactory.get_web_driver(executor=executor, browser=browser)
+    headless = request.config.getoption("--headless")
+    driver = DriverFactory.get_web_driver(executor=executor, browser=browser, headless=headless)
     yield driver
     DriverFactory.quit_web_driver(driver)
 
@@ -20,7 +22,8 @@ def driver_function(request):
 def driver_class(request):
     executor = request.config.getoption("--executor")
     browser = request.config.getoption("--browser")
-    driver = DriverFactory.get_web_driver(executor=executor, browser=browser)
+    headless = request.config.getoption("--headless")
+    driver = DriverFactory.get_web_driver(executor=executor, browser=browser, headless=headless)
     yield driver
     DriverFactory.quit_web_driver(driver)
 
@@ -49,7 +52,7 @@ def pytest_runtest_makereport(item, call):
     """
     Automatically record the test execution process and failure information
     """
-    # 执行测试
+    # Execute test
     outcome = yield
     report = outcome.get_result()
 
@@ -57,7 +60,7 @@ def pytest_runtest_makereport(item, call):
     if report.when == "setup":
         logger.info(f"test start: {item.nodeid}")
 
-    # record at the end of the test, if failed, record the error message
+    # Record at the end of the test, if failed, record the error message
     elif report.when == "call":
         # Add Dynamic Title & Browser Tag to allure report to distinguish test results
         browser = item.config.getoption("--browser", default="unknown")
@@ -65,14 +68,14 @@ def pytest_runtest_makereport(item, call):
         allure.dynamic.label("browser", browser)
         allure.dynamic.tag(browser)
 
-        #Logging test results
+        # Log test results
         if report.passed:
             logger.info(f"test passed: {item.nodeid}")
         elif report.failed:
             logger.error(f"test failed: {item.nodeid}")
             logger.error(f"error message: {call.excinfo}")
 
-    # clean up
+    # Clean up
     elif report.when == "teardown":
         logger.info(f"test finished: {item.nodeid}")
 
