@@ -20,11 +20,11 @@ class TestShopping:
 
 
 
-    @pytest.mark.parametrize("goods_name1, goods_name2, add_count, left_count",
-                             get_json_data(r".\data\test_add_to_cart.json"))
-    def test_add_goods_to_cart(self, goods_name1, goods_name2, add_count, left_count):
-        #login website
-        self.login_proxy.login("standard_user", "secret_sauce")
+    @pytest.mark.parametrize("username, password, goods_name1, goods_name2, add_count, left_count",
+                             get_json_data("./data/test_add_to_cart.json"))
+    def test_add_goods_to_cart(self, username, password, goods_name1, goods_name2, add_count, left_count):
+        # login website
+        self.login_proxy.login(username, password)
         #add 2 goods to cart and check number
         self.home_proxy.add_goods_to_cart_and_check_number(goods_name1)
         number = self.home_proxy.add_goods_to_cart_and_check_number(goods_name2)
