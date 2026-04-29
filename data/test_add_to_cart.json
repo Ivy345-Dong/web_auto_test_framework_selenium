@@ -1,14 +1,10 @@
 {
-  "add first goods":{
-      "goods_name":"Sauce Labs Backpack",
-      "count": "1"
-  },
-  "add second goods":{
-      "goods_name":"Sauce Labs Bike Light",
-      "count": "2"
-  },
-  "add third goods":{
-      "goods_name":"Sauce Labs Bolt T-Shirt",
-      "count": "3"
+  "add goods and remove": {
+    "username": "standard_user",
+    "password": "secret_sauce",
+    "goods_name1": "Sauce Labs Backpack",
+    "goods_name2": "Sauce Labs Bike Light",
+    "add_count": "2",
+    "left_count": "1"
   }
 }
